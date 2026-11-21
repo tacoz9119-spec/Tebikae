@@ -61,6 +61,8 @@ textarea:focus-visible,input:focus-visible,[contenteditable]:focus-visible{outli
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 .app{height:100%;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+/* iPhoneのホーム画面から開いたとき、時計などの帯の下を地の色でふさぐ。ふさがないと、上の帯（Tebikaeの文字やボタン）がぼかされて暗く見える（Kousei・Bunpituと同じ指定） */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
 .ib{width:34px;height:34px;flex:none;display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:7px;background:transparent;color:var(--muted)}
 .ib:hover{background:var(--sunken);color:var(--fg)}
 .ib:disabled{opacity:.3;cursor:default;background:transparent}
@@ -441,7 +443,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.04';
+var VERSION='1.05';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
