@@ -174,7 +174,17 @@ textarea:focus-visible,input:focus-visible,[contenteditable]:focus-visible{outli
 .abanner{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:8px 12px;border-radius:8px;background:var(--sunken);font-size:13px;color:var(--fg2)}
 .mt,.mb{display:block;width:100%;margin:0;padding:0;border:0;background:transparent;resize:none;overflow:hidden;outline:none;caret-color:var(--caret)}
 .mt{font-size:calc(var(--ts) + var(--dfs));font-weight:500;line-height:1.45;color:var(--fg)}
-.mb{margin-top:6px;font-size:calc(var(--fs) - 1px + var(--dfs));line-height:1.75;color:var(--fg2)}
+.mb{font-size:calc(var(--fs) - 1px + var(--dfs));line-height:1.75;color:var(--fg2)}
+.lwrap{position:relative}
+.lwb{margin-top:6px}
+.lview{position:absolute;inset:0;white-space:pre-wrap;overflow-wrap:break-word;cursor:text}
+.lview[hidden]{display:none}
+.mtv{font-size:calc(var(--ts) + var(--dfs));font-weight:500;line-height:1.45;color:var(--fg)}
+.mbv{font-size:calc(var(--fs) - 1px + var(--dfs));line-height:1.75;color:var(--fg2)}
+.lwrap.on textarea{color:transparent}
+.lview a,.tx a{color:var(--caret);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px;overflow-wrap:anywhere;cursor:pointer}
+.tx.lk{cursor:text}
+.row2.done .tx a{color:var(--muted)}
 .mt::placeholder,.mb::placeholder{color:var(--muted);opacity:1}
 .expand{display:flex;align-items:center;justify-content:center;gap:8px;min-width:200px;min-height:44px;margin-top:22px;padding:0 20px;border:1.5px dashed var(--line2);border-radius:10px;background:transparent;color:var(--fg);font-size:14px;font-weight:500}
 .expand:hover{border-color:var(--fg)}
@@ -396,8 +406,8 @@ body.nosel{-webkit-user-select:none;user-select:none}
         <div class="mcol" id="mcol">
           <div class="mmeta"><button type="button" class="chip" id="chip2"><span id="chipName2"></span><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg></button><span class="mdate" id="mdate2"></span></div>
           <div class="abanner" id="abanner" hidden><span>アーカイブしたメモです。</span><button type="button" class="lnk" id="bUnarch">一覧に戻す</button></div>
-          <textarea id="mt" class="mt" rows="1" placeholder="無題のメモ" aria-label="メモの名前" enterkeyhint="next"></textarea>
-          <textarea id="mb" class="mb" rows="1" placeholder="本文" aria-label="本文"></textarea>
+          <div class="lwrap"><textarea id="mt" class="mt" rows="1" placeholder="無題のメモ" aria-label="メモの名前" enterkeyhint="next"></textarea><div class="lview mtv" hidden></div></div>
+          <div class="lwrap lwb"><textarea id="mb" class="mb" rows="1" placeholder="本文" aria-label="本文"></textarea><div class="lview mbv" hidden></div></div>
           <button type="button" class="expand" id="bExpand" hidden><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 5h10M7 10h10M7 15h10"/></svg>アウトライン</button>
           <div class="hidebar" id="hidebar" hidden><span id="hidecnt"></span><button type="button" class="lnk" id="bHideShow">表示する</button></div>
           <div class="outline" id="outline"></div>
@@ -431,7 +441,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.03';
+var VERSION='1.04';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
@@ -483,6 +493,37 @@ function tidy(h){ var p; do{ p=h; h=h.replace(/<\/b><b>/g,'').replace(/<\/i><i>/
 function cleanFrom(root){ return tidy(cleanNodes(root,false,false)); }
 function cleanStr(s){ var t=document.createElement('template'); t.innerHTML=String(s||''); return cleanFrom(t.content); }
 function plainOf(h){ var t=document.createElement('template'); t.innerHTML=h; return t.content.textContent||''; }
+/* http:// か https:// で始まる部分をリンクにする */
+var URL_G=/https?:\/\/[A-Za-z0-9\-._~:\/?#\[\]@!$&'()*+,;=%]+/g;
+function hasUrl(s){ return /https?:\/\/[A-Za-z0-9]/.test(s||''); }
+function urlTrim(u){
+  while(/[.,;:!?'"*]$/.test(u) || (/\)$/.test(u) && u.split('(').length<u.split(')').length)) u=u.slice(0,-1);
+  return u;
+}
+function linkText(s){
+  var out='', last=0, m; URL_G.lastIndex=0;
+  while((m=URL_G.exec(s))){
+    var u=urlTrim(m[0]); if(!/^https?:\/\/[A-Za-z0-9]/.test(u)) continue;
+    out+=esc(s.slice(last, m.index))+'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(u)+'</a>';
+    last=m.index+u.length; URL_G.lastIndex=last;
+  }
+  return out+esc(s.slice(last));
+}
+function linkHtml(h){
+  var t=document.createElement('template'); t.innerHTML=h;
+  var w=document.createTreeWalker(t.content, NodeFilter.SHOW_TEXT, null), list=[], n;
+  while((n=w.nextNode())) if(hasUrl(n.nodeValue)) list.push(n);
+  list.forEach(function(n){ var s=document.createElement('template'); s.innerHTML=linkText(n.nodeValue); n.parentNode.replaceChild(s.content, n); });
+  var d=document.createElement('div'); d.append(t.content); return d.innerHTML;
+}
+/* 画面上の位置が、要素の文字の何文字目にあたるか */
+function offsetAt(box, x, y){
+  var sc=null, so=0;
+  if(document.caretRangeFromPoint){ var r=document.caretRangeFromPoint(x, y); if(r){ sc=r.startContainer; so=r.startOffset; } }
+  else if(document.caretPositionFromPoint){ var p=document.caretPositionFromPoint(x, y); if(p){ sc=p.offsetNode; so=p.offset; } }
+  if(!sc || !box.contains(sc)) return null;
+  var pre=document.createRange(); pre.selectNodeContents(box); pre.setEnd(sc, so); return pre.toString().length;
+}
 function mkNode(t){ t=t||''; return { id:uid(), t:t, h:esc(t), c:false, x:false, a:false, ch:[] }; }
 
 /* ---------- データ ---------- */
@@ -1182,6 +1223,7 @@ function renderMemo(){
   $('abanner').hidden=!m.archived;
   if(document.activeElement!==mt || mt.value!==m.title) mt.value=m.title;
   if(document.activeElement!==mb || mb.value!==m.body) mb.value=m.body;
+  paintTA(mt); paintTA(mb);
   var vis=m.root.ch.filter(shown), ac=countA(m.root), hx=m.hideDone ? countX(m.root) : 0;
   $('bExpand').hidden = vis.length>0 || hx>0;
   $('hidebar').hidden=!hx; $('hidecnt').textContent='打ち消し線の項目を'+hx+'件隠しています';
@@ -1198,7 +1240,8 @@ function build(c){
   var kids=c.ch.filter(shown), name=c.t.trim()||'無題';
   var bul=el('button','bul'); bul.type='button'; bul.tabIndex=-1; bul.setAttribute('aria-label', kids.length ? '「'+name+'」を動かす・開閉する' : '「'+name+'」を動かす');
   bul.append(el('span','dot'+(kids.length && c.c ? ' cl':'')));
-  var tx=el('div','tx'); tx.contentEditable='true'; tx.id='t-'+c.id; tx.innerHTML=c.h; tx.setAttribute('role','textbox'); tx.setAttribute('aria-label','項目'); tx.spellcheck=false;
+  var tx=el('div','tx'); tx.id='t-'+c.id; tx.setAttribute('role','textbox'); tx.setAttribute('aria-label','項目'); tx.spellcheck=false;
+  if(hasUrl(c.t)){ tx.contentEditable='false'; tx.classList.add('lk'); tx.innerHTML=linkHtml(c.h); } else { tx.contentEditable='true'; tx.innerHTML=c.h; }
   row.append(bul, tx);
   if(kids.length){
     var tg=el('button','tog'); tg.type='button'; tg.tabIndex=-1;
@@ -1258,7 +1301,18 @@ function curFocus(){
   var it=a.closest && a.closest('.item'); if(!it) return null;
   return { id:it.dataset.id, f:'tx', pos:getCaret(a) };
 }
-function focusEl(e, pos){ if(!e) return; e.focus({ preventScroll:true }); setCaret(e, pos); try{ e.scrollIntoView({ block:'nearest' }); }catch(x){} }
+function editTx(tx){
+  if(!tx || tx.isContentEditable) return;
+  var it=tx.closest('.item'), x=it && idx.get(it.dataset.id);
+  tx.innerHTML=x ? x.node.h : tx.innerHTML; tx.contentEditable='true'; tx.classList.remove('lk');
+}
+function viewTx(tx){
+  if(!tx || !tx.isConnected || document.activeElement===tx) return;
+  var it=tx.closest('.item'), x=it && idx.get(it.dataset.id);
+  if(!x || !hasUrl(x.node.t)) return;
+  tx.contentEditable='false'; tx.classList.add('lk'); tx.innerHTML=linkHtml(x.node.h);
+}
+function focusEl(e, pos){ if(!e) return; if(e.classList && e.classList.contains('tx')) editTx(e); e.focus({ preventScroll:true }); setCaret(e, pos); try{ e.scrollIntoView({ block:'nearest' }); }catch(x){} }
 function focusItem(id, pos){ focusEl($('t-'+id), pos); }
 function restore(f){ if(!f) return; if(f.f==='mt') focusEl(mt, f.pos); else if(f.f==='mb') focusEl(mb, f.pos); else if(idx.has(f.id) && isVisible(f.id)) focusItem(f.id, f.pos); }
 
@@ -1415,12 +1469,40 @@ outline.addEventListener('paste', function(e){
     commit(); if(last) focusItem(last.id, null);
   }
 });
+outline.addEventListener('click', function(e){
+  var tx=e.target.closest && e.target.closest('.tx.lk'); if(!tx || tx.isContentEditable) return;
+  if(e.target.closest('a')) return;   /* リンクはブラウザで開く */
+  var sel=window.getSelection(); if(sel && !sel.isCollapsed && tx.contains(sel.anchorNode)) return;   /* 文字を選んでいるときは書く状態にしない */
+  var off=offsetAt(tx, e.clientX, e.clientY);
+  focusEl(tx, off);
+});
+outline.addEventListener('focusout', function(e){
+  var t=e.target; if(!t.classList || !t.classList.contains('tx')) return;
+  setTimeout(function(){ viewTx(t); }, 0);
+});
 outline.addEventListener('drop', function(e){ if(e.target.closest && e.target.closest('.tx')) e.preventDefault(); });
 outline.addEventListener('click', function(e){
   var b=e.target.closest('button'); if(!b) return;
   var id=b.closest('.item').dataset.id;
   if(b.classList.contains('bul')){ if(noBulClick) return; var x=idx.get(id); if(x && x.node.ch.filter(shown).length) toggle(id); else focusItem(id, null); }
   else if(b.classList.contains('tog')) toggle(id);
+});
+function paintTA(ta){
+  var w=ta.parentNode, v=w.querySelector('.lview'), on=document.activeElement!==ta && hasUrl(ta.value);
+  w.classList.toggle('on', on); v.hidden=!on;
+  if(on){ var h=linkText(ta.value); if(v.innerHTML!==h) v.innerHTML=h; }
+}
+[mt, mb].forEach(function(ta){
+  var v=ta.parentNode.querySelector('.lview');
+  ta.addEventListener('focus', function(){ paintTA(ta); });
+  ta.addEventListener('blur', function(){ paintTA(ta); });
+  v.addEventListener('click', function(e){
+    if(e.target.closest('a')) return;
+    var sel=window.getSelection(); if(sel && !sel.isCollapsed && v.contains(sel.anchorNode)) return;
+    var off=offsetAt(v, e.clientX, e.clientY);
+    ta.parentNode.classList.remove('on'); v.hidden=true;
+    focusEl(ta, off);
+  });
 });
 mt.addEventListener('input', function(){ var m=cur(); if(!m) return; var v=mt.value.replace(/[\r\n]+/g,' '); if(v!==mt.value) mt.value=v; m.title=v; autosize(mt); touch(m); });
 mt.addEventListener('keydown', function(e){
