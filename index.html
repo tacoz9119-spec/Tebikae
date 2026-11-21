@@ -271,6 +271,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 .vrow .vm{font-size:12px;color:var(--muted)}
 .vprev{max-height:40vh;overflow-y:auto;padding:10px 12px;border-radius:9px;background:var(--sunken);color:var(--fg);font-size:13.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
 .sheet .foot{font-size:12px;line-height:1.6;color:var(--muted)}
+.sheet .msg:empty{display:none}
 .msg{min-height:1.6em;font-size:13px;color:var(--fg2)}
 .ctx{position:fixed;z-index:55;min-width:200px;padding:5px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--fg);box-shadow:0 6px 24px var(--shadow);display:flex;flex-direction:column}
 .ctx button{display:flex;align-items:center;gap:10px;min-height:32px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:inherit;font-size:14px;text-align:left;white-space:nowrap}
@@ -430,7 +431,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.01';
+var VERSION='1.02';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
@@ -1957,8 +1958,6 @@ $('bSet').addEventListener('click', openSettings);
 function openSettings(){
   openSheet(function(s){
     s.append(el('h2',null,'設定'));
-    s.append(el('h3',null,'同期'));
-    syncSection(s);
     s.append(el('h3',null,'カテゴリ'));
     s.append(sb('カテゴリの編集', '', function(){ openCatEditor(false); }, S.cats.length));
     s.append(sb('アーカイブしたメモ', '', function(){ closeSheet(); if(NARROW.matches && S.cur){ leaveCurrent(); S.cur=null; S.view='list'; } selectCat('archive'); render(); }, countIn('archive')));
@@ -1974,7 +1973,8 @@ function openSettings(){
     s.append(sb('バックアップから戻す', '', function(){ $('fileIn').value=''; $('fileIn').click(); }));
     s.append(sb('削除したメモを戻す', '', openDeleted));
     s.append(msg);
-    s.append(el('p','foot','保存先：'+(Store.mode==='db' ? 'この端末と、あなたのアカウント（iPhone・iPad・Macで同期）' : 'この端末')));
+    s.append(el('h3',null,'同期'));
+    syncSection(s);
     s.append(el('p','foot','Version '+VERSION));
     closeRow(s);
   });
