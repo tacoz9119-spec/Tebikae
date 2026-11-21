@@ -430,7 +430,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.00';
+var VERSION='1.01';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
@@ -1644,10 +1644,17 @@ function endMemoDrag(apply){
   if(d.raf) cancelAnimationFrame(d.raf);
   document.body.classList.remove('nosel');
   if(apply && d.target && Math.abs(d.y-d.y0)>4) reorderMemo(d.id, d.target, d.pos);
+  noRowClick=true; setTimeout(function(){ noRowClick=false; }, 400);
   renderList();
 }
 rowsEl.addEventListener('pointerup', function(e){ if(mdrag && e.pointerId===mdrag.pid) endMemoDrag(true); });
 rowsEl.addEventListener('pointercancel', function(e){ if(mdrag && e.pointerId===mdrag.pid) endMemoDrag(false); });
+/* MacとiPad（一覧とメモを並べる表示）：一覧の何もないところをクリックすると、右のメモを閉じる */
+$('listCol').addEventListener('click', function(e){
+  if(NARROW.matches || !S.cur || noRowClick || mdrag || sw) return;
+  if(e.target.closest('button,input,textarea,label,a,form,.row,#tabs,#sbar')) return;
+  leaveCurrent(); S.cur=null; S.view='list'; showTools(false); render();
+});
 
 /* 一覧のメモを指で横に払う：右へ払うとアーカイブ（アーカイブの一覧では一覧に戻す）、左へ払うと削除 */
 var sw=null, noRowClick=false;
