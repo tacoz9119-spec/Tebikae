@@ -431,7 +431,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.02';
+var VERSION='1.03';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
@@ -1132,7 +1132,7 @@ function renderList(){
   list=sortedMemos().filter(function(m){ return inCat(m, S.sel); });
   $('lcount').textContent=list.length+'件';
   if(!list.length){
-    var msg = S.sel==='archive' ? 'アーカイブしたメモはありません。' : S.sel==='inbox' ? '未分類のメモはありません。上の欄に書いて、追加してください。' : 'このカテゴリのメモはありません。上の欄に書くと、このカテゴリに入ります。';
+    var msg = S.sel==='archive' ? 'アーカイブしたメモはありません。' : S.sel==='inbox' ? '未分類のメモはありません。' : 'このカテゴリのメモはありません。';
     rowsEl.append(el('p','empty',msg)); return;
   }
   var canMove=list.length>1;
