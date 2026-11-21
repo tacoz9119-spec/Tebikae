@@ -118,7 +118,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .qform input{flex:1;min-width:0;height:34px;padding:0 10px;border:1px solid transparent;border-radius:8px;background:var(--sunken);color:var(--fg);font-size:14px}
 .qform input:focus{background:var(--surface);border-color:var(--fg)}
 .qform input::placeholder{color:var(--muted);opacity:1}
-.qform .go{display:none}
+.qform .go{display:inline-flex;width:34px;height:34px;flex:none;align-items:center;justify-content:center;padding:0;border:0;border-radius:8px;background:var(--fg);color:var(--on)}
+.qform .go:focus-visible{outline:2px solid var(--caret);outline-offset:2px}
+@media (pointer:coarse){ .qform input{height:44px;padding:0 14px;border-radius:10px;font-size:16px} .qform .go{width:44px;height:44px;border-radius:10px} }
 .sbar{flex:none;display:flex;align-items:center;gap:8px;padding:8px 0}
 .sbar .search{flex:1;width:auto;height:40px}
 .sbar .search input{font-size:16px}
@@ -314,7 +316,6 @@ body.nosel{-webkit-user-select:none;user-select:none}
   .tabs{margin:0 -8px;padding:0 8px}
   .qform{margin-top:12px}
   .qform input{height:44px;padding:0 14px;border-radius:10px;font-size:16px}
-  .qform .add{display:none}
   .qform .go{display:inline-flex;width:44px;height:44px;flex:none;align-items:center;justify-content:center;padding:0;border:0;border-radius:10px;background:var(--fg);color:var(--on)}
   .rows{margin:12px 0 0;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
   .rows .grp{background:var(--surface);border:1px solid var(--line);border-radius:14px}
@@ -369,7 +370,6 @@ body.nosel{-webkit-user-select:none;user-select:none}
       <form class="qform" id="qform" autocomplete="off">
         <label class="sr" for="qin">新しいメモ</label>
         <input id="qin" type="text" placeholder="メモを書く" enterkeyhint="done">
-        <button type="submit" class="btn pri add">追加</button>
         <button type="submit" class="go" aria-label="メモを追加"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4.5v11M5 10.5l5 5 5-5"/></svg></button>
       </form>
       <div class="rows" id="rows"></div>
@@ -442,7 +442,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.08';
+var VERSION='1.09';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
