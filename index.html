@@ -442,7 +442,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.09';
+var VERSION='1.10';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
@@ -1155,6 +1155,7 @@ function selName(){ if(S.sel==='inbox') return '未分類'; if(S.sel==='archive'
 function renderList(){
   if(mdrag) return;
   if(S.sel!=='inbox' && S.sel!=='archive' && !catExists(S.sel)) S.sel='inbox';
+  $('qform').hidden=S.sel==='archive';
   $('lname').textContent = S.q ? '検索の結果' : selName();
   rowsEl.textContent='';
   if(S.mode==='loading'){ rowsEl.append(el('p','empty','メモを読み込んでいます…')); return; }
@@ -1665,12 +1666,11 @@ function openMemo(id, itemId){
 $('bBack').addEventListener('click', function(){ leaveCurrent(); S.cur=null; S.view='list'; showTools(false); render(); });
 $('qform').addEventListener('submit', function(e){
   e.preventDefault();
-  var inp=$('qin'), t=inp.value.trim(); if(!t) return;
+  var inp=$('qin'), t=inp.value.trim(); if(!t || S.sel==='archive') return;
   var cat=(S.sel!=='inbox' && S.sel!=='archive' && catExists(S.sel)) ? S.sel : '';
   var m=newMemo(t, cat); S.memos.set(m.id, m); inp.value=''; touch(m);
   if(S.q) endSearch();
   renderSide(); renderTabs(); renderList();
-  if(S.sel==='archive') toast('未分類に入れました', '未分類を見る', function(){ selectCat('inbox'); });
   inp.focus();
 });
 
@@ -2138,7 +2138,7 @@ document.addEventListener('keydown', function(e){
   var mod=e.metaKey||e.ctrlKey; if(!mod || e.isComposing) return;
   var a=document.activeElement;
   if((e.key==='z'||e.key==='Z') && cur() && ov.hidden && a!==$('q') && a!==$('qin') && a!==$('qn')){ e.preventDefault(); e.stopPropagation(); if(e.shiftKey) redo(); else undo(); return; }
-  if((e.key==='n'||e.key==='N') && !NARROW.matches && ov.hidden){ e.preventDefault(); $('qin').focus(); }
+  if((e.key==='n'||e.key==='N') && !NARROW.matches && ov.hidden){ e.preventDefault(); if(S.sel==='archive') selectCat('inbox'); $('qin').focus(); }
 }, true);
 document.addEventListener('beforeinput', function(e){
   if(e.inputType!=='historyUndo' && e.inputType!=='historyRedo') return;
