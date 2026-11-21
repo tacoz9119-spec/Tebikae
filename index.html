@@ -149,8 +149,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .row.dragging{z-index:3;background:var(--surface);border-radius:10px;box-shadow:0 8px 22px var(--shadow)}
 .row.dragging::before,.row.dragging+.row::before{display:none}
 .row.dragging .mgrip{cursor:grabbing;color:var(--caret)}
-.row.db{box-shadow:inset 0 2px 0 var(--caret)}
-.row.da{box-shadow:inset 0 -2px 0 var(--caret)}
+.row.shift{transition:transform .16s ease}
 .rbtn{flex:none;margin-right:6px;min-height:30px;padding:0 10px;border:1px solid var(--line2);border-radius:7px;background:var(--surface);color:var(--fg);font-size:12.5px}
 .rbtn:hover{border-color:var(--fg)}
 .empty{margin:0;padding:24px 10px;font-size:13px;line-height:1.7;color:var(--muted);text-align:center}
@@ -443,7 +442,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.07';
+var VERSION='1.08';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
@@ -1699,6 +1698,12 @@ rowsEl.addEventListener('pointerdown', function(e){
   e.preventDefault();
   var r=g.closest('.row');
   mdrag={ id:g.dataset.grip, r:r, pid:e.pointerId, y0:e.clientY, y:e.clientY, sc0:rowsEl.scrollTop, target:null, pos:null, raf:0 };
+  /* 動かし始めたときの各行の位置（一覧の中の高さ）を覚えておく */
+  var all=Array.prototype.slice.call(rowsEl.querySelectorAll('.row[data-id]')), base=rowsEl.getBoundingClientRect().top-rowsEl.scrollTop;
+  mdrag.rows=all; mdrag.from=all.indexOf(r);
+  mdrag.mid=all.map(function(x){ var b=x.getBoundingClientRect(); return b.top-base+b.height/2; });
+  mdrag.h=r.getBoundingClientRect().height;
+  all.forEach(function(x){ if(x!==r) x.classList.add('shift'); });
   try{ g.setPointerCapture(e.pointerId); }catch(x){}
   r.classList.add('dragging'); document.body.classList.add('nosel');
 });
@@ -1714,15 +1719,19 @@ function memoAutoScroll(){
   if(v){ var before=rowsEl.scrollTop; rowsEl.scrollTop+=v; if(rowsEl.scrollTop!==before){ memoDragStep(); mdrag.raf=requestAnimationFrame(memoAutoScroll); } }
 }
 function memoDragStep(){
-  var d=mdrag;
-  d.r.style.transform='translateY('+(d.y-d.y0+(rowsEl.scrollTop-d.sc0))+'px)';
-  var rs=Array.prototype.filter.call(rowsEl.querySelectorAll('.row[data-id]'), function(x){ return x!==d.r; });
-  rs.forEach(function(x){ x.classList.remove('db','da'); }); d.target=null; d.pos=null;
-  if(!rs.length) return;
-  var hit=null, pos='after';
-  for(var i=0;i<rs.length;i++){ var b=rs[i].getBoundingClientRect(); if(d.y<b.top+b.height/2){ hit=rs[i]; pos='before'; break; } }
-  if(!hit) hit=rs[rs.length-1];
-  d.target=hit.dataset.id; d.pos=pos; hit.classList.add(pos==='before' ? 'db' : 'da');
+  var d=mdrag, dy=d.y-d.y0+(rowsEl.scrollTop-d.sc0);
+  d.r.style.transform='translateY('+dy+'px)';
+  /* 動かしている行の真ん中が、ほかの行の真ん中を越えたら、その行をずらしてすき間を空ける */
+  var cy=d.mid[d.from]+dy, to=d.from, i;
+  for(i=d.from+1; i<d.rows.length; i++) if(d.mid[i]<cy) to=i;
+  for(i=d.from-1; i>=0; i--) if(d.mid[i]>cy) to=i;
+  d.rows.forEach(function(x, k){
+    if(k===d.from) return;
+    var sft=(k>d.from && k<=to) ? -d.h : (k<d.from && k>=to) ? d.h : 0;
+    x.style.transform=sft ? 'translateY('+sft+'px)' : '';
+  });
+  if(to===d.from){ d.target=null; d.pos=null; }
+  else { d.target=d.rows[to].dataset.id; d.pos=to>d.from ? 'after' : 'before'; }
 }
 function endMemoDrag(apply){
   var d=mdrag; mdrag=null; if(!d) return;
