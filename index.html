@@ -74,7 +74,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 @media (pointer:coarse){.btn{min-height:44px;font-size:15px}}
 
 /* 上の帯 */
-#top{flex:none;display:flex;align-items:center;gap:10px;background:var(--bg);border-bottom:1px solid var(--line);
+#top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;flex:none;display:flex;align-items:center;gap:10px;background:var(--bg);border-bottom:1px solid var(--line);
   padding-block:10px;padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px))}
 .brand{font-size:18px;letter-spacing:.02em}
 .spacer{flex:1}
@@ -328,7 +328,8 @@ body.nosel{-webkit-user-select:none;user-select:none}
   .mgrip{width:30px;margin-left:4px;margin-right:-12px}
   .app[data-view="list"] #memoCol{display:none}
   .app[data-view="memo"] #listCol,.app[data-view="memo"] #top{display:none}
-  .mhead{margin:0;padding:4px max(6px,env(safe-area-inset-right,0px)) 4px max(8px,env(safe-area-inset-left,0px));gap:0}
+  #memoCol{overflow:visible}
+  .mhead{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);margin:0;padding:4px max(6px,env(safe-area-inset-right,0px)) 4px max(8px,env(safe-area-inset-left,0px));gap:0}
   .back{display:inline-flex}
   .mhead .chip,.mhead .mdate{display:none}
   .mscroll{padding:16px max(16px,env(safe-area-inset-right,0px)) 260px max(22px,env(safe-area-inset-left,0px))}
@@ -443,7 +444,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.05';
+var VERSION='1.06';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
