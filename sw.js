@@ -2,7 +2,7 @@
    起動時は端末に保存した版をすぐ使い、裏で新しい版を取りに行く（更新は次回の起動から反映）。
    ファイルを更新したら、下の CACHE の番号を1つ増やすと、確実に入れ替わる。
    同じアドレス（github.io）のほかのアプリ（Kousei・Hongaki・Bunpitu）の保存分を消さないよう、名前が「tebikae-」で始まるものだけを扱う。 */
-const CACHE='tebikae-v7';
+const CACHE='tebikae-v8';
 const FONTS='tebikae-fonts';
 const FILES=['./','index.html','firebase-config.js','firebase.js','manifest.webmanifest','icon-180.png','icon-180-dark.png','icon-192.png','icon-512.png','favicon-16.png','favicon-32.png','favicon-48.png'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting())); });
