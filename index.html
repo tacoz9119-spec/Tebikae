@@ -442,7 +442,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.11';
+var VERSION='1.12';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
@@ -1066,7 +1066,8 @@ function authError(e){
   if(c==='auth/network-request-failed') return '通信できませんでした。接続を確かめてください';
   return 'ログインできませんでした';
 }
-/* ログイン欄はフォームにしない。フォームにすると、Safariがパスワードの自動入力のあとにログインまで済ませてしまうため（Hongakiと同じ作り） */
+/* ログイン欄はフォームにしない。フォームにすると、Safariがパスワードの自動入力のあとにログインまで済ませてしまうため（Hongakiと同じ作り）。
+   パスワード欄のEnterキーでもログインさせない。自動入力がEnterを送ってすぐログインしてしまい、違うアカウントを選んだときに欄のメールアドレスを確かめられないため */
 function syncSection(s){
   var box=el('div','sync'); s.append(box);
   var shape='';
@@ -1095,7 +1096,6 @@ function syncSection(s){
     var f=el('div','sform');
     var mail=document.createElement('input'); mail.type='email'; mail.id='si-mail'; mail.autocomplete='username'; mail.placeholder='メールアドレス'; mail.setAttribute('aria-label','メールアドレス'); mail.value=mv; mail.autocapitalize='off'; mail.spellcheck=false;
     var pass=document.createElement('input'); pass.type='password'; pass.id='si-pass'; pass.autocomplete='current-password'; pass.placeholder='パスワード'; pass.setAttribute('aria-label','パスワード');
-    pass.addEventListener('keydown', function(e){ if(e.key==='Enter' && !e.isComposing){ e.preventDefault(); signInNow(); } });
     var go=btn(syncBusy ? 'ログインしています…' : 'ログイン','pri', signInNow); go.disabled=syncBusy;
     var rs=el('button','linkish','パスワードを忘れた場合'); rs.type='button'; rs.addEventListener('click', resetPass);
     f.append(mail, pass, go, rs); box.append(f);
