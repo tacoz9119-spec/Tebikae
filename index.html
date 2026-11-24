@@ -340,6 +340,15 @@ body.nosel{-webkit-user-select:none;user-select:none}
 .mmeta{display:none;align-items:center;gap:10px;margin-bottom:12px}
 @media (min-width:760px){.ftools{display:none!important}}
 @media (prefers-reduced-motion:reduce){.dot{transition:none}}
+/* iPhoneのSafariは、文字が16px未満の入力欄をタップすると画面を拡大し、そのまま戻らない。
+   iPhone（指で操作し、画面の幅か高さが小さい端末）でだけ、入力欄の文字を16px以上にする（Kousei 1.39と同じ考え方）。iPadとMacは今のまま。
+   メモの名前（.mt）のように、もとから16pxより大きい欄は、その大きさを保つ。本文と項目は、文字サイズの設定（小・標準・大）を生かしつつ16pxを下回らないようにする */
+@media (pointer:coarse) and (max-width:700px),(pointer:coarse) and (max-height:500px){
+  input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]):not([type=button]),select,textarea:not(.mt){font-size:16px!important}
+  textarea.mb,.lview.mbv{font-size:max(16px, calc(var(--fs) - 1px + var(--dfs)))!important}
+  [contenteditable]{font-size:max(16px, calc(var(--fs) + var(--dfs)))!important}
+  .tx{padding:calc((var(--rh) - max(16px, calc(var(--fs) + var(--dfs))) * 1.5) / 2) 0}
+}
 </style>
 </head>
 <body>
@@ -442,7 +451,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.12';
+var VERSION='1.13';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
