@@ -234,9 +234,10 @@ body.nosel{-webkit-user-select:none;user-select:none}
 .ftools.sel .gs:first-of-type{border-left:0}
 
 /* シート */
-.ov{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:var(--overlay);
-  padding:16px max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-.sheet{width:100%;max-width:460px;max-height:88%;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:22px;border-radius:14px;background:var(--surface);color:var(--fg);box-shadow:0 18px 48px var(--shadow)}
+.ov{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-start;justify-content:center;background:var(--overlay);
+  padding:calc(env(safe-area-inset-top,0px) + 24px) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheet{width:100%;max-width:460px;max-height:min(100%, calc(100vh - 64px));overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:22px;border-radius:14px;background:var(--surface);color:var(--fg);box-shadow:0 18px 48px var(--shadow)}
+.sheet:focus{outline:none}
 .sheet h2{margin:0;font-size:17px;font-weight:700;line-height:1.45;overflow-wrap:anywhere}
 .sheet h3{margin:8px 0 0;padding-bottom:6px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--fg2)}
 .sheet p{margin:0;font-size:13px;line-height:1.7;color:var(--fg2)}
@@ -365,7 +366,6 @@ body.nosel{-webkit-user-select:none;user-select:none}
   .mmeta{display:flex!important}
   .wtools{display:none!important}
   .sheet{max-width:none}
-  .ov{align-items:flex-end}
 }
 .mmeta{display:none;align-items:center;gap:10px;margin-bottom:12px}
 @media (min-width:760px){.ftools{display:none!important}}
@@ -481,7 +481,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.16';
+var VERSION='1.18';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
@@ -1922,7 +1922,8 @@ function openMovePicker(id){
 $('chip').addEventListener('click', function(){ if(S.cur) openMovePicker(S.cur); });
 $('chip2').addEventListener('click', function(){ if(S.cur) openMovePicker(S.cur); });
 
-function openCatEditor(focusNew){
+/* back：設定から開いたときに、設定へ戻る関数。一覧の「＋カテゴリを追加」から開いたときはなし */
+function openCatEditor(focusNew, back){
   openSheet(function(s){
     s.append(el('h2',null,'カテゴリの編集'));
     s.append(el('p',null,'名前はその場で書き換えられます。左のつまみをドラッグすると、並びを変えられます。'));
@@ -1936,7 +1937,7 @@ function openCatEditor(focusNew){
         var inp=document.createElement('input'); inp.type='text'; inp.value=c.name; inp.setAttribute('aria-label','カテゴリの名前'); inp.id='cn-'+c.id;
         inp.addEventListener('input', function(){ c.name=inp.value; saveMeta(); renderSide(); renderTabs(); });
         var del=el('button','ib'); del.type='button'; del.innerHTML=ICON.x; del.setAttribute('aria-label','「'+(c.name||'無題')+'」を削除');
-        del.addEventListener('click', function(){ confirmDelCat(c); });
+        del.addEventListener('click', function(){ confirmDelCat(c, back); });
         r.append(g, inp, del); list.append(r);
       });
     }
@@ -1973,23 +1974,25 @@ function openCatEditor(focusNew){
     list.addEventListener('pointercancel', function(e){ if(cdrag && e.pointerId===cdrag.pid) endC(false); });
     var nc=el('form','newcat'), inp=document.createElement('input'); inp.type='text'; inp.placeholder='新しいカテゴリの名前'; inp.setAttribute('aria-label','新しいカテゴリの名前'); inp.id='newcat';
     nc.append(inp, submitter(nc, '追加'));
-    nc.addEventListener('submit', function(e){ e.preventDefault(); var v=inp.value.trim(); if(!v){ inp.focus(); return; } addCategory(v); inp.value=''; draw(); renderSide(); renderTabs(); inp.focus(); });
+    nc.addEventListener('submit', function(e){ e.preventDefault(); var v=inp.value.trim(); if(!v){ inp.focus(); return; } addCategory(v); inp.value=''; renderSide(); renderTabs();
+      if(back){ back(); toast('「'+short(v)+'」を追加しました'); return; }
+      draw(); inp.focus(); });
     s.append(nc);
-    closeRow(s);
+    var cr=el('div','btnrow'); cr.append(btn('閉じる','', back || closeSheet)); s.append(cr);
     if(focusNew) setTimeout(function(){ inp.focus(); }, 60);
   });
 }
-function confirmDelCat(c){
+function confirmDelCat(c, back){
   var n=0; S.memos.forEach(function(m){ if(m.cat===c.id) n++; });
   openSheet(function(s){
     s.append(el('h2',null,'「'+(c.name||'無題のカテゴリ')+'」を削除しますか？'));
     s.append(el('p',null, n ? 'このカテゴリのメモ'+n+'件は、未分類に移ります。メモは消えません。' : 'このカテゴリにメモはありません。'));
     var r=el('div','btnrow');
-    r.append(btn('やめる','', function(){ openCatEditor(false); }), btn('削除する','pri', function(){
+    r.append(btn('やめる','', function(){ openCatEditor(false, back); }), btn('削除する','pri', function(){
       S.cats=S.cats.filter(function(x){ return x.id!==c.id; });
       S.memos.forEach(function(m){ if(m.cat===c.id){ m.cat=''; touch(m); } });
       if(S.sel===c.id) S.sel='inbox';
-      saveMeta(); render(); openCatEditor(false);
+      saveMeta(); render(); openCatEditor(false, back);
     }));
     s.append(r);
   });
@@ -2104,7 +2107,7 @@ function openSettings(){
     var hd=el('div','phead'); hd.append(el('h2',null,'設定'), btn('閉じる','', closeSheet)); s.append(hd);
     var g=group('カテゴリ');
     var na=countIn('archive');
-    g.append(row(btn('カテゴリの編集','', function(){ openCatEditor(false); }),
+    g.append(row(btn('カテゴリの編集','', function(){ openCatEditor(false, openSettings); }),
                  btn('アーカイブしたメモ'+(na ? '（'+na+'件）' : ''),'', function(){ closeSheet(); if(NARROW.matches && S.cur){ leaveCurrent(); S.cur=null; S.view='list'; } selectCat('archive'); render(); })));
     g=group('文字の大きさ');
     g.append(segOf([['l','大'],['m','中'],['s','小']], pref('size')||'m', function(v){ pref('size', v); applySize(); }));
