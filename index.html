@@ -301,7 +301,20 @@ body.nosel{-webkit-user-select:none;user-select:none}
 .sheet.panel .seg button{min-width:64px}
 .sheet.panel .sform input{height:auto;padding:9px 10px;border-radius:7px;font-size:16px}
 .sheet.panel .sform .pbtns .btn{align-self:auto}
-@media (max-width:759px){ .sheet.panel .btn,.sheet.panel .seg button{min-height:36px} }
+/* Kousei 1.39 と同じ寸法（ボタン：高さ30px・文字13px・左右14px・角6px。Noto Sans JP は文字が下に寄って見えるので、下に2pxあけて文字を1px上げる） */
+.sheet.panel .btn,.sheet.panel .seg button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:30px;padding:0 14px 2px;border-radius:6px;font-size:13px}
+.sheet.panel .btn:disabled{opacity:.55}
+.sheet.panel .pgroup{gap:10px}
+.sheet.panel .pbtns{gap:10px}
+.sheet.panel .seg{gap:10px}
+.sheet.panel h3{font-size:13px;line-height:1.6;letter-spacing:0;color:var(--fg)}
+.sheet.panel .small,.sheet.panel .foot{font-size:13px}
+.sheet.panel .small.who{font-size:14px;color:var(--fg2)}
+.sheet.panel .small.syer{font-size:14px}
+.sheet.panel .sform{align-items:flex-start;gap:10px}
+.sheet.panel .sform input{width:260px;max-width:100%;height:38px;padding:0 10px;border:1px solid var(--line2);border-radius:8px;font-size:15px}
+.sheet.panel .sform .pbtns{align-items:center}
+.sheet.panel .linkish{align-self:auto;padding:0;min-height:0;color:var(--fg);font-size:13px;line-height:1.6;text-underline-offset:auto}
 .ctx{position:fixed;z-index:55;min-width:200px;padding:5px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--fg);box-shadow:0 6px 24px var(--shadow);display:flex;flex-direction:column}
 .ctx button{display:flex;align-items:center;gap:10px;min-height:32px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:inherit;font-size:14px;text-align:left;white-space:nowrap}
 .ctx button svg{flex:none;color:var(--muted)}
@@ -468,7 +481,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.15';
+var VERSION='1.16';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
@@ -1111,7 +1124,7 @@ function syncSection(s){
     if(st==='none'){ box.append(el('p','small','Firebaseの設定（firebase-config.js）が入っていないため、この端末だけに保存しています。')); return; }
     if(st==='wait'){ box.append(el('p','small','ログインの状態を確かめています…')); return; }
     if(st==='in'){
-      var who=el('p','small who','ログイン中：'); who.append(el('b',null,Store.user.email||'')); box.append(who);
+      box.append(el('p','small who','ログイン中：'+(Store.user.email||'')));
       box.append(el('p','small syst','今の状態：'+statusInfo().text));
       var er2=el('p','small syer'); var t2=(Store.ready && lastError) ? errorText(lastError) : ''; er2.textContent=t2; er2.hidden=!t2; box.append(er2);
       var out=btn('ログアウト','', signOutNow); out.disabled=syncBusy; var ob=el('div','pbtns'); ob.append(out); box.append(ob);
@@ -1123,9 +1136,10 @@ function syncSection(s){
     var mail=document.createElement('input'); mail.type='email'; mail.id='si-mail'; mail.autocomplete='username'; mail.placeholder='メールアドレス'; mail.setAttribute('aria-label','メールアドレス'); mail.value=mv; mail.autocapitalize='off'; mail.spellcheck=false;
     var pass=document.createElement('input'); pass.type='password'; pass.id='si-pass'; pass.autocomplete='current-password'; pass.placeholder='パスワード'; pass.setAttribute('aria-label','パスワード');
     var go=btn(syncBusy ? 'ログインしています…' : 'ログイン','pri', signInNow); go.disabled=syncBusy;
-    var rs=btn('パスワードを忘れた','', resetPass);
-    var bs=el('div','pbtns'); bs.append(go, rs);
-    f.append(mail, pass, bs); box.append(f);
+    var rs=el('button','linkish','パスワードを忘れた場合'); rs.type='button'; rs.addEventListener('click', resetPass);
+    /* 並びはKouseiと同じ：メールアドレス／パスワードとログイン／パスワードを忘れた場合 */
+    var bs=el('div','pbtns'); bs.append(pass, go);
+    f.append(mail, bs, rs); box.append(f);
   };
   syncDraw();
 }
