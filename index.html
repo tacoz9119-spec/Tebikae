@@ -286,6 +286,22 @@ body.nosel{-webkit-user-select:none;user-select:none}
 .sheet .foot{font-size:12px;line-height:1.6;color:var(--muted)}
 .sheet .msg:empty{display:none}
 .msg{min-height:1.6em;font-size:13px;color:var(--fg2)}
+/* 設定（Hongakiのパネルと同じ寸法） */
+.sheet.panel{max-width:600px;gap:16px;padding:20px;border-radius:12px}
+.phead{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sheet.panel h2{font-size:22px;font-weight:600}
+.pgroup{display:flex;flex-direction:column;gap:8px}
+.sheet.panel h3{margin:0;padding:0;border:0;font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.pbtns{display:flex;flex-wrap:wrap;gap:8px}
+.sheet .small,.sheet.panel .foot{margin:0;font-size:12px;line-height:1.6;color:var(--muted)}
+.sheet .small b{color:var(--fg);font-weight:500}
+.sheet .small.syer{color:var(--danger)}
+.sheet.panel .btn,.sheet.panel .seg button{min-height:30px;padding:0 10px;border-radius:6px;font-size:13px}
+.sheet.panel .seg{gap:8px}
+.sheet.panel .seg button{min-width:64px}
+.sheet.panel .sform input{height:auto;padding:9px 10px;border-radius:7px;font-size:16px}
+.sheet.panel .sform .pbtns .btn{align-self:auto}
+@media (max-width:759px){ .sheet.panel .btn,.sheet.panel .seg button{min-height:36px} }
 .ctx{position:fixed;z-index:55;min-width:200px;padding:5px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--fg);box-shadow:0 6px 24px var(--shadow);display:flex;flex-direction:column}
 .ctx button{display:flex;align-items:center;gap:10px;min-height:32px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:inherit;font-size:14px;text-align:left;white-space:nowrap}
 .ctx button svg{flex:none;color:var(--muted)}
@@ -452,7 +468,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.14';
+var VERSION='1.15';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
@@ -1092,23 +1108,24 @@ function syncSection(s){
     }
     var keepMail=box.querySelector('#si-mail'), mv=keepMail ? keepMail.value : '';
     shape=st; box.textContent='';
-    if(st==='none'){ box.append(el('p',null,'Firebaseの設定（firebase-config.js）が入っていないため、この端末だけに保存しています。')); return; }
-    if(st==='wait'){ box.append(el('p',null,'ログインの状態を確かめています…')); return; }
+    if(st==='none'){ box.append(el('p','small','Firebaseの設定（firebase-config.js）が入っていないため、この端末だけに保存しています。')); return; }
+    if(st==='wait'){ box.append(el('p','small','ログインの状態を確かめています…')); return; }
     if(st==='in'){
-      box.append(el('p','who','ログイン中：'+(Store.user.email||'')));
-      box.append(el('p','syst','今の状態：'+statusInfo().text));
-      var er2=el('p','syer'); var t2=(Store.ready && lastError) ? errorText(lastError) : ''; er2.textContent=t2; er2.hidden=!t2; box.append(er2);
-      var out=btn('ログアウト','', signOutNow); out.disabled=syncBusy; box.append(out);
+      var who=el('p','small who','ログイン中：'); who.append(el('b',null,Store.user.email||'')); box.append(who);
+      box.append(el('p','small syst','今の状態：'+statusInfo().text));
+      var er2=el('p','small syer'); var t2=(Store.ready && lastError) ? errorText(lastError) : ''; er2.textContent=t2; er2.hidden=!t2; box.append(er2);
+      var out=btn('ログアウト','', signOutNow); out.disabled=syncBusy; var ob=el('div','pbtns'); ob.append(out); box.append(ob);
       return;
     }
-    box.append(el('p',null,'Hongaki・Kouseiと同じメールアドレスとパスワードでログインすると、iPhone・iPad・Macの間でメモを同期できます。ログインしなくても、この端末には保存されます。'));
-    box.append(el('p','syst','今の状態：'+statusInfo().text));
+    box.append(el('p','small','Hongaki・Kouseiと同じメールアドレスとパスワードでログインすると、iPhone・iPad・Macの間でメモを同期できます。ログインしなくても、この端末には保存されます。'));
+    box.append(el('p','small syst','今の状態：'+statusInfo().text));
     var f=el('div','sform');
     var mail=document.createElement('input'); mail.type='email'; mail.id='si-mail'; mail.autocomplete='username'; mail.placeholder='メールアドレス'; mail.setAttribute('aria-label','メールアドレス'); mail.value=mv; mail.autocapitalize='off'; mail.spellcheck=false;
     var pass=document.createElement('input'); pass.type='password'; pass.id='si-pass'; pass.autocomplete='current-password'; pass.placeholder='パスワード'; pass.setAttribute('aria-label','パスワード');
     var go=btn(syncBusy ? 'ログインしています…' : 'ログイン','pri', signInNow); go.disabled=syncBusy;
-    var rs=el('button','linkish','パスワードを忘れた場合'); rs.type='button'; rs.addEventListener('click', resetPass);
-    f.append(mail, pass, go, rs); box.append(f);
+    var rs=btn('パスワードを忘れた','', resetPass);
+    var bs=el('div','pbtns'); bs.append(go, rs);
+    f.append(mail, pass, bs); box.append(f);
   };
   syncDraw();
 }
@@ -1855,7 +1872,7 @@ function endSearch(){ S.q=''; $('q').value=''; $('qn').value=''; $('sbar').hidde
 $('bSearchEnd').addEventListener('click', endSearch);
 
 /* ---------- シート ---------- */
-function openSheet(fill){ sheet.textContent=''; fill(sheet); ov.hidden=false; var f=sheet.querySelector('input:not([type=checkbox]),button'); if(f && !NARROW.matches) f.focus(); }
+function openSheet(fill){ sheet.textContent=''; sheet.className='sheet'; fill(sheet); ov.hidden=false; var f=sheet.querySelector('input:not([type=checkbox]),button'); if(f && !NARROW.matches) f.focus(); }
 function closeSheet(){ ov.hidden=true; }
 ov.addEventListener('click', function(e){ if(e.target===ov) closeSheet(); });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape' && !ov.hidden) closeSheet(); });
@@ -2067,26 +2084,29 @@ function copyText(m, msg){
 $('bSet').addEventListener('click', openSettings);
 function openSettings(){
   openSheet(function(s){
-    s.append(el('h2',null,'設定'));
-    s.append(el('h3',null,'カテゴリ'));
-    s.append(sb('カテゴリの編集', '', function(){ openCatEditor(false); }, S.cats.length));
-    s.append(sb('アーカイブしたメモ', '', function(){ closeSheet(); if(NARROW.matches && S.cur){ leaveCurrent(); S.cur=null; S.view='list'; } selectCat('archive'); render(); }, countIn('archive')));
-    s.append(el('h3',null,'外見'));
-    s.append(el('p',null,'配色'));
-    s.append(segOf([['auto','端末に合わせる'],['light','ライト'],['dark','ダーク']], pref('theme')||'auto', function(v){ pref('theme', v); applyTheme(); }));
-    s.append(el('p',null,'文字の大きさ'));
-    s.append(segOf([['l','大'],['m','中'],['s','小']], pref('size')||'m', function(v){ pref('size', v); applySize(); }));
-    s.append(el('h3',null,'バックアップ'));
-    s.append(el('p',null,'すべてのメモとカテゴリを、1つのファイル（Tebikae-backup-日付.json）に保存します。戻すときは、そのファイルを選びます。アーティファクト版で保存したバックアップも読み込めます。'));
+    s.classList.add('panel');
+    function group(title){ var g=el('div','pgroup'); g.append(el('h3',null,title)); s.append(g); return g; }
+    function row(){ var r=el('div','pbtns'); for(var i=0;i<arguments.length;i++) r.append(arguments[i]); return r; }
+    var hd=el('div','phead'); hd.append(el('h2',null,'設定'), btn('閉じる','', closeSheet)); s.append(hd);
+    var g=group('カテゴリ');
+    var na=countIn('archive');
+    g.append(row(btn('カテゴリの編集','', function(){ openCatEditor(false); }),
+                 btn('アーカイブしたメモ'+(na ? '（'+na+'件）' : ''),'', function(){ closeSheet(); if(NARROW.matches && S.cur){ leaveCurrent(); S.cur=null; S.view='list'; } selectCat('archive'); render(); })));
+    g=group('文字の大きさ');
+    g.append(segOf([['l','大'],['m','中'],['s','小']], pref('size')||'m', function(v){ pref('size', v); applySize(); }));
+    g=group('配色');
+    g.append(segOf([['auto','端末の設定に合わせる'],['light','ライト'],['dark','ダーク']], pref('theme')||'auto', function(v){ pref('theme', v); applyTheme(); }));
+    g.append(el('p','small','文字の大きさと配色は、この端末に記憶されます。'));
+    g=group('バックアップ');
     var msg=el('p','msg'); msg.setAttribute('aria-live','polite');
-    s.append(sb('すべてのメモをバックアップ', '', function(){ exportBackup(msg); }));
-    s.append(sb('バックアップから戻す', '', function(){ $('fileIn').value=''; $('fileIn').click(); }));
-    s.append(sb('削除したメモを戻す', '', openDeleted));
-    s.append(msg);
-    s.append(el('h3',null,'同期'));
-    syncSection(s);
+    g.append(row(btn('すべてのメモをバックアップ','', function(){ exportBackup(msg); }),
+                 btn('バックアップから戻す','', function(){ $('fileIn').value=''; $('fileIn').click(); }),
+                 btn('削除したメモを戻す','', openDeleted)));
+    g.append(el('p','small','すべてのメモとカテゴリを、1つのファイル（Tebikae-backup-日付.json）に保存します。戻すときは、そのファイルを選びます。アーティファクト版で保存したバックアップも読み込めます。'));
+    g.append(msg);
+    g=group('同期');
+    syncSection(g);
     s.append(el('p','foot','Version '+VERSION));
-    closeRow(s);
   });
   if(!NARROW.matches){ sheet.setAttribute('tabindex','-1'); sheet.focus({ preventScroll:true }); }
 }
