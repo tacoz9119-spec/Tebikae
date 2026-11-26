@@ -302,8 +302,8 @@ body.nosel{-webkit-user-select:none;user-select:none}
 .sheet.panel .seg button{min-width:64px}
 .sheet.panel .sform input{height:auto;padding:9px 10px;border-radius:7px;font-size:16px}
 .sheet.panel .sform .pbtns .btn{align-self:auto}
-/* Kousei 1.39 と同じ寸法（ボタン：高さ30px・文字13px・左右14px・角6px。Noto Sans JP は文字が下に寄って見えるので、下に2pxあけて文字を1px上げる） */
-.sheet.panel .btn,.sheet.panel .seg button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:30px;padding:0 14px 2px;border-radius:6px;font-size:13px}
+/* Kousei 1.39 と同じ寸法（ボタン：高さ30px・文字13px・左右14px・角6px。文字の上下の位置は調整しない） */
+.sheet.panel .btn,.sheet.panel .seg button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:30px;padding:0 14px;border-radius:6px;font-size:13px}
 .sheet.panel .btn:disabled{opacity:.55}
 .sheet.panel .pgroup{gap:10px}
 .sheet.panel .pbtns{gap:10px}
@@ -380,9 +380,9 @@ body.nosel{-webkit-user-select:none;user-select:none}
   .tx{padding:calc((var(--rh) - max(16px, calc(var(--fs) + var(--dfs))) * 1.5) / 2) 0}
 }
 /* ボタンの大きさは Kousei 1.39 とそろえる（Mac・iPad・iPhone 共通）
-   文字のボタン：高さ30px・文字13px・左右14px・角6px。Noto Sans JP は文字が下に寄って見えるので、下に2pxあけて文字を1px上げる
+   文字のボタン：高さ30px・文字13px・左右14px・角6px。文字の上下の位置は調整しない
    アイコンだけのボタン：30px四方・角6px */
-.btn,.seg button,.sb,.rbtn,.expand,.dash{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:30px;padding:0 14px 2px;border-radius:6px;font-size:13px;line-height:1.6}
+.btn,.seg button,.sb,.rbtn,.expand,.dash{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:30px;padding:0 14px;border-radius:6px;font-size:13px;line-height:1.6}
 .sb{justify-content:flex-start;gap:10px;width:auto;max-width:100%;align-self:flex-start;text-align:left}
 .sb .n{margin-left:4px;font-size:13px}
 .rbtn{margin-right:6px}
@@ -398,69 +398,83 @@ body.nosel{-webkit-user-select:none;user-select:none}
 .newcat{align-items:center}
 .newcat .go{display:inline-flex;width:38px;height:38px;flex:none;align-items:center;justify-content:center;padding:0;border:0;border-radius:8px;background:var(--fg);color:var(--on)}
 .newcat .go:focus-visible{outline:2px solid var(--caret);outline-offset:2px}
-/* ===== シリーズ共通の大きさの基準（Kousei 1.41 と同じ。1.22） =====
-   高さ36：押すもの（文字のボタン、アイコンのボタン36×36、戻る、タブ、メニューの項目、カテゴリの行）と入力欄
-   文字：題名18・太字／ボタン・タブ・メニュー・一覧・見出し（太字）・説明・入力欄15／件数・状態・日付・バージョン12
-   アイコン：アイコンのボタンは16、文字のボタンの中は15
-   角：外側の枠14／浮かぶ枠・枠の中の枠10／入力欄・追加ボタン・一覧の行8／ボタン6
+/* ===== シリーズ共通の大きさの基準（Kousei 1.43 と同じ。1.23） =====
+   高さ32：押すもの（文字のボタン、アイコンのボタン32×32、戻る、タブ、切り替え、追加ボタン、メニューの項目、1行の一覧の行）と入力欄
+   文字：題名18・太字／ボタン・タブ・切り替え・メニュー・一覧・見出し（太字）・入力欄14／状態・件数・日付・説明文12
+   ボタンの左右の余白12。アイコン：アイコンのボタンは16、文字のボタンの中は14
+   角：外側の枠14／枠の中の枠・浮かぶ枠10／入力欄・追加ボタン・1行の一覧の行8／ボタン・切り替えの外枠6
+   文字を1px上げる調整はしない（Noto Sans JP はもともと少し上に描かれるため）
    例外（今のまま）：メモの中身（名前・本文・項目と項目の行・印・開閉）、メモの一覧の行（指で操作する端末で大きくする）、
-   2行の文字が入るもの（以前の版の行・項目を戻す行・2行目のあるメモの行）、枠が見えない部品（つまみ・下線の文字）、
-   小さな記号（項目数の印・⌄・B I S）、iPhone のキーボードの上の道具、iPhone の上の帯（39） */
+   2行の文字が入るものの高さ、枠が見えない部品（つまみ・下線の文字）、小さな記号（項目数の印・⌄・B I S）、アプリ名、
+   iPhone のキーボードの上の道具、iPhone の上の帯（39）、iPhone のカテゴリのタブ（下線のタブ。高さと文字だけ基準） */
 /* 文字のボタン */
-.btn,.seg button,.sb,.rbtn,.expand,.dash,.chip{min-height:36px;padding:0 14px 2px;border-radius:6px;font-size:15px}
-.sheet.panel .btn,.sheet.panel .seg button{min-height:36px;padding:0 14px 2px;font-size:15px}
-.chip{height:auto;padding:0 10px 2px 14px}
-.sb .n,.sheet .sb .n{font-size:15px}
-.expand svg,.archlink svg,.architems svg,.ctx button svg,.back svg{width:15px;height:15px}
+.btn,.seg button,.sb,.rbtn,.expand,.dash,.chip,.sheet.panel .btn{min-height:32px;padding:0 12px;border-radius:6px;font-size:14px}
+.chip{height:auto;padding:0 8px 0 12px}
+.sb .n,.sheet .sb .n{font-size:14px}
+.expand svg,.archlink svg,.architems svg,.ctx button svg,.back svg{width:14px;height:14px}
 /* アイコンのボタン */
-.ib{width:36px;height:36px;border-radius:6px}
+.ib{width:32px;height:32px;border-radius:6px}
 .ib svg{width:16px;height:16px}
 #bMenu svg{width:18px;height:18px}
 /* 追加ボタン（↓↑）と入力欄 */
-.qform input,.newcat input,.crow input,.sheet.panel .sform input,.mvnew input,#mvnew{height:36px;padding:0 10px;border-radius:8px;font-size:15px}
-.qform .go,.newcat .go{width:36px;height:36px;border-radius:8px}
+.qform input,.newcat input,.crow input,.sheet.panel .sform input,#mvnew{height:32px;padding:0 10px;border-radius:8px;font-size:14px}
+.qform .go,.newcat .go{width:32px;height:32px;border-radius:8px}
 .qform .go svg,.newcat .go svg{width:16px;height:16px}
-.search{height:36px}
-.search input{font-size:15px}
-.sbar .search{height:36px}
-.copybox{font-size:15px}
-/* 戻る・タブ・カテゴリの行・メニューの項目 */
-.back{min-height:36px;font-size:15px}
-.tab{min-height:36px;font-size:15px}
+.search{height:32px}
+.search input{font-size:14px}
+.copybox{font-size:14px}
+/* 戻る・タブ・カテゴリの行・メニューの項目・1行の一覧の行 */
+.back{min-height:32px;font-size:14px}
+.tab{min-height:32px;font-size:14px}
 .tab .n{font-size:12px}
-.si{min-height:36px;padding-top:0;padding-bottom:2px;font-size:15px}
-.archlink{min-height:36px;padding:8px 8px 0;font-size:15px}
-.architems{min-height:36px;font-size:15px}
-.lnk{min-height:36px;font-size:15px}
-#bSearchEnd{min-height:36px!important;align-self:center}
+.si{min-height:32px;padding-top:0;padding-bottom:0;font-size:14px}
+.archlink{min-height:32px;padding:8px 8px 0;font-size:14px}
+.architems{min-height:32px;font-size:14px}
+.lnk{min-height:32px;font-size:14px}
+#bSearchEnd{min-height:32px!important;font-size:14px!important;align-self:center;white-space:nowrap;flex:none}
+.sbar .search{min-width:0}
 .ctx{border-radius:10px}
-.ctx button{min-height:36px;padding:0 12px 2px;font-size:15px}
-.pick button{min-height:36px;padding:0 6px 2px;border-radius:8px;font-size:15px}
+.ctx button{min-height:32px;padding:0 12px;font-size:14px}
+.pick button{min-height:32px;padding:0 6px;border-radius:8px;font-size:14px}
 .pick button .n{font-size:12px}
-/* 道具の帯（切り替え）：外枠36、中のボタンは枠いっぱい */
-.tb{height:36px;border-radius:6px}
-.tb button{height:100%;padding:0 9px 2px}
+/* 切り替え（Hongaki の形：1pxの枠で囲み、区切り線でつなぐ。選んだものは墨色、文字は白・ふつうの太さ） */
+.seg,.sheet.panel .seg{display:inline-flex;flex-wrap:nowrap;align-self:flex-start;gap:0;height:32px;max-width:100%;border:1px solid var(--line2);border-radius:6px;overflow:hidden;background:var(--surface)}
+.seg button,.sheet.panel .seg button{height:100%;min-height:0;min-width:0;padding:0 13px;border:0;border-left:1px solid var(--line2);border-radius:0;background:transparent;font-size:14px;font-weight:400;white-space:nowrap}
+.seg button:first-child,.sheet.panel .seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"],.sheet.panel .seg button[aria-pressed="true"]{background:var(--fg);color:var(--on);font-weight:400}
+.tb{height:32px;border-radius:6px}
+.tb button{height:100%;padding:0 13px}
 .tb button svg{width:16px;height:16px}
+/* 2段の一覧（以前の版・項目を戻す）：1つの枠（角10）の中に区切り線で並べ、行ごとの角はなし */
+.vlist,.alist{gap:0;border:1px solid var(--line2);border-radius:10px;overflow:hidden}
+.vrow{border:0;border-top:1px solid var(--line);border-radius:0}
+.vlist>.vrow:first-child{border-top:0}
+.vrow:hover,.vrow.on{background:var(--sunken)}
+.vlist .vprev{margin:0 12px 10px;border-radius:10px}
+.vlist .btnrow{padding:0 12px 12px}
+.arow{border:0;border-top:1px solid var(--line);border-radius:0}
+.alist>.arow:first-child{border-top:0}
+.arow:has(input:checked){background:var(--weak)}
+.arow .at{font-size:14px}
+.vrow .vt{font-size:14px}
 /* 文字 */
 .sheet h2,.sheet.panel h2{font-size:18px;font-weight:700;line-height:1.45}
-.sheet h3,.sheet.panel h3{font-size:15px;font-weight:700;color:var(--fg)}
-.sheet p,.sheet .small,.sheet.panel .small,.sheet.panel .small.who,.sheet.panel .small.syer,.msg,.empty,.mempty,.abanner{font-size:15px}
+.sheet h3,.sheet.panel h3{font-size:14px;font-weight:700;color:var(--fg)}
+.ph{font-size:14px}
+.sheet p,.sheet .small,.sheet.panel .small,.sheet.panel .small.who,.sheet.panel .small.syer,.sheet .msg,.empty,.mempty,.abanner{font-size:12px}
 .sheet .foot,.sheet.panel .foot{font-size:12px}
-.ph{font-size:15px}
-.toast{font-size:15px}
-.toast button{font-size:15px}
-.vprev{font-size:15px}
+.toast,.toast button{font-size:14px}
+.vprev{font-size:14px}
 .keys{font-size:12px!important}
 .hidebar{font-size:12px}
 /* 角の丸み */
 .sheet,.sheet.panel{border-radius:14px}
 .vprev{border-radius:10px}
-.vrow,.arow{border-radius:8px}
-@media (pointer:coarse){ .si{min-height:36px;font-size:15px} .dash{min-height:36px} .archlink{min-height:36px} .btn{min-height:36px;font-size:15px} .rbtn{min-height:36px;font-size:15px} .qform input{height:36px;padding:0 10px;border-radius:8px} .qform .go{width:36px;height:36px;border-radius:8px} .ib{width:36px;height:36px;border-radius:6px} }
-@media (max-width:759px){ .ib{width:36px;height:36px;border-radius:6px} #top{padding-block:1px} }
-@media (min-width:760px){ #top{padding-block:9px} }
-#bSearchEnd{white-space:nowrap;flex:none}
-.sbar .search{min-width:0}
+/* 上の帯：Mac・iPad は55（32のボタン＋上下11）、iPhone は例外の39（32のボタン＋上下3） */
+@media (min-width:760px){ #top{padding-block:11px} }
+@media (max-width:759px){ #top{padding-block:3px} }
+@media (pointer:coarse){ .si{min-height:32px;font-size:14px} .dash{min-height:32px} .archlink{min-height:32px} .btn{min-height:32px;font-size:14px} .rbtn{min-height:32px;font-size:14px} .qform input{height:32px;padding:0 10px;border-radius:8px} .qform .go{width:32px;height:32px;border-radius:8px} .ib{width:32px;height:32px;border-radius:6px} }
+@media (max-width:759px){ .ib{width:32px;height:32px;border-radius:6px} }
 </style>
 </head>
 <body>
@@ -563,7 +577,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.22';
+var VERSION='1.23';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
