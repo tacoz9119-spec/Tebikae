@@ -481,7 +481,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.18';
+var VERSION='1.19';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
@@ -1974,9 +1974,7 @@ function openCatEditor(focusNew, back){
     list.addEventListener('pointercancel', function(e){ if(cdrag && e.pointerId===cdrag.pid) endC(false); });
     var nc=el('form','newcat'), inp=document.createElement('input'); inp.type='text'; inp.placeholder='新しいカテゴリの名前'; inp.setAttribute('aria-label','新しいカテゴリの名前'); inp.id='newcat';
     nc.append(inp, submitter(nc, '追加'));
-    nc.addEventListener('submit', function(e){ e.preventDefault(); var v=inp.value.trim(); if(!v){ inp.focus(); return; } addCategory(v); inp.value=''; renderSide(); renderTabs();
-      if(back){ back(); toast('「'+short(v)+'」を追加しました'); return; }
-      draw(); inp.focus(); });
+    nc.addEventListener('submit', function(e){ e.preventDefault(); var v=inp.value.trim(); if(!v){ inp.focus(); return; } addCategory(v); inp.value=''; draw(); renderSide(); renderTabs(); inp.focus(); });
     s.append(nc);
     var cr=el('div','btnrow'); cr.append(btn('閉じる','', back || closeSheet)); s.append(cr);
     if(focusNew) setTimeout(function(){ inp.focus(); }, 60);
