@@ -179,6 +179,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .mb{font-size:calc(var(--fs) - 1px + var(--dfs));line-height:1.75;color:var(--fg2)}
 .lwrap{position:relative}
 .lwb{margin-top:6px}
+.lwb.quiet{display:none}
 .lview{position:absolute;inset:0;white-space:pre-wrap;overflow-wrap:break-word;cursor:text}
 .lview[hidden]{display:none}
 .mtv{font-size:calc(var(--ts) + var(--dfs));font-weight:500;line-height:1.45;color:var(--fg)}
@@ -451,7 +452,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.13';
+var VERSION='1.14';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
@@ -1234,7 +1235,7 @@ function renderMemo(){
   $('abanner').hidden=!m.archived;
   if(document.activeElement!==mt || mt.value!==m.title) mt.value=m.title;
   if(document.activeElement!==mb || mb.value!==m.body) mb.value=m.body;
-  paintTA(mt); paintTA(mb);
+  paintTA(mt); paintTA(mb); paintBody();
   var vis=m.root.ch.filter(shown), ac=countA(m.root), hx=m.hideDone ? countX(m.root) : 0;
   $('bExpand').hidden = vis.length>0 || hx>0;
   $('hidebar').hidden=!hx; $('hidecnt').textContent='打ち消し線の項目を'+hx+'件隠しています';
@@ -1266,6 +1267,12 @@ function build(c){
 }
 function autosize(ta){ if(!ta.offsetParent) return; ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; }
 function sizeAll(){ autosize(mt); autosize(mb); }
+/* 本文の欄を隠すのは、本文が空で、アウトラインに（アーカイブしていない）項目があり、本文を書いていないとき */
+function bodyQuiet(){ var m=cur(); return !!m && !m.body.trim() && m.root.ch.some(function(c){ return !c.a; }) && document.activeElement!==mb; }
+function paintBody(){ mb.parentNode.classList.toggle('quiet', bodyQuiet()); }
+function openBody(pos){ mb.parentNode.classList.remove('quiet'); autosize(mb); focusEl(mb, pos); }
+/* アウトラインの一番上から上へ移るとき、本文の欄が隠れていればタイトルへ */
+function upToBody(){ if(bodyQuiet()) focusEl(mt, null); else focusEl(mb,null); }
 
 /* ---------- カーソル ---------- */
 function selIn(e){ var s=window.getSelection(); if(!s || !s.rangeCount) return null; var r=s.getRangeAt(0); return e.contains(r.startContainer) ? r : null; }
@@ -1325,7 +1332,7 @@ function viewTx(tx){
 }
 function focusEl(e, pos){ if(!e) return; if(e.classList && e.classList.contains('tx')) editTx(e); e.focus({ preventScroll:true }); setCaret(e, pos); try{ e.scrollIntoView({ block:'nearest' }); }catch(x){} }
 function focusItem(id, pos){ focusEl($('t-'+id), pos); }
-function restore(f){ if(!f) return; if(f.f==='mt') focusEl(mt, f.pos); else if(f.f==='mb') focusEl(mb, f.pos); else if(idx.has(f.id) && isVisible(f.id)) focusItem(f.id, f.pos); }
+function restore(f){ if(!f) return; if(f.f==='mt') focusEl(mt, f.pos); else if(f.f==='mb') openBody(f.pos); else if(idx.has(f.id) && isVisible(f.id)) focusItem(f.id, f.pos); }
 
 /* ---------- 戻す・やり直す ---------- */
 function stateOf(m){ return JSON.stringify({ title:m.title, body:m.body, cat:m.cat, hideDone:!!m.hideDone, archived:!!m.archived, items:itemsOf(m) }); }
@@ -1371,7 +1378,7 @@ function focusNeighbor(v, i){
   var after=visible(), f=null, k;
   for(k=i+1;k<v.length && !f;k++) if(after.indexOf(v[k])>=0) f=v[k];
   for(k=i-1;k>=0 && !f;k--) if(after.indexOf(v[k])>=0) f=v[k];
-  if(f) focusItem(f, null); else focusEl(mb, null);
+  if(f) focusItem(f, null); else upToBody();
 }
 function toggleStrike(id){
   var x=idx.get(id), m=cur(); if(!x) return;
@@ -1405,7 +1412,7 @@ function backspace(ev, id){
   var x=idx.get(id), node=x.node, parent=x.parent, v=visible(), i=v.indexOf(id), prevId=i>0?v[i-1]:null;
   if(node.t==='' && !node.ch.length){
     ev.preventDefault(); parent.ch.splice(parent.ch.indexOf(node),1); commit();
-    if(prevId) focusItem(prevId, null); else focusEl(mb, null); return;
+    if(prevId) focusItem(prevId, null); else upToBody(); return;
   }
   if(!node.ch.length && prevId){
     ev.preventDefault();
@@ -1444,7 +1451,7 @@ function itemKey(e, tx, id){
   if(k==='Backspace' && collapsed(tx) && getCaret(tx)===0){ backspace(e, id); return; }
   if(k==='ArrowUp' && !e.shiftKey && !e.altKey && onFirstLine(tx)){
     v=visible(); i=v.indexOf(id); e.preventDefault();
-    if(i>0) focusItem(v[i-1], Math.min(getCaret(tx), idx.get(v[i-1]).node.t.length)); else focusEl(mb, null);
+    if(i>0) focusItem(v[i-1], Math.min(getCaret(tx), idx.get(v[i-1]).node.t.length)); else upToBody();
     return;
   }
   if(k==='ArrowDown' && !e.shiftKey && !e.altKey && onLastLine(tx)){
@@ -1518,9 +1525,10 @@ function paintTA(ta){
 mt.addEventListener('input', function(){ var m=cur(); if(!m) return; var v=mt.value.replace(/[\r\n]+/g,' '); if(v!==mt.value) mt.value=v; m.title=v; autosize(mt); touch(m); });
 mt.addEventListener('keydown', function(e){
   if(e.isComposing || e.keyCode===229) return;
-  if(e.key==='Enter'){ e.preventDefault(); focusEl(mb, 0); return; }
-  if(e.key==='ArrowDown' && onLastLine(mt)){ e.preventDefault(); focusEl(mb, 0); }
+  if(e.key==='Enter'){ e.preventDefault(); openBody(0); return; }
+  if(e.key==='ArrowDown' && onLastLine(mt)){ e.preventDefault(); if(bodyQuiet()){ var v0=visible(); if(v0.length){ focusItem(v0[0], 0); return; } } openBody(0); }
 });
+mb.addEventListener('blur', function(){ setTimeout(paintBody, 0); });
 mb.addEventListener('input', function(){ var m=cur(); if(!m) return; m.body=mb.value; autosize(mb); touch(m); });
 mb.addEventListener('keydown', function(e){
   if(e.isComposing || e.keyCode===229) return;
