@@ -475,6 +475,15 @@ body.nosel{-webkit-user-select:none;user-select:none}
 @media (max-width:759px){ #top{padding-block:3px} }
 @media (pointer:coarse){ .si{min-height:32px;font-size:14px} .dash{min-height:32px} .archlink{min-height:32px} .btn{min-height:32px;font-size:14px} .rbtn{min-height:32px;font-size:14px} .qform input{height:32px;padding:0 10px;border-radius:8px} .qform .go{width:32px;height:32px;border-radius:8px} .ib{width:32px;height:32px;border-radius:6px} }
 @media (max-width:759px){ .ib{width:32px;height:32px;border-radius:6px} }
+/* 道具の帯が1行に収まるように、メモの一覧の欄の幅を画面の幅に合わせる（ボタンは縮めない） */
+#listCol{width:clamp(300px, calc(100vw - 800px), 360px)}
+@media (max-width:1099px){ #listCol{width:clamp(250px, calc(100vw - 570px), 320px)} }
+@media (max-width:759px){ #listCol{width:100%} }
+.tb,.tb button{flex-shrink:0}
+.tb button{white-space:nowrap}
+/* それでも足りない狭い窓（Mac）では、帯を横にずらして見る */
+.wtools{overflow-x:auto;scrollbar-width:none}
+.wtools::-webkit-scrollbar{display:none}
 </style>
 </head>
 <body>
@@ -577,7 +586,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.23';
+var VERSION='1.24';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
