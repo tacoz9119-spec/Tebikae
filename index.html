@@ -379,6 +379,23 @@ body.nosel{-webkit-user-select:none;user-select:none}
   [contenteditable]{font-size:max(16px, calc(var(--fs) + var(--dfs)))!important}
   .tx{padding:calc((var(--rh) - max(16px, calc(var(--fs) + var(--dfs))) * 1.5) / 2) 0}
 }
+/* ボタンの大きさは Kousei 1.39 とそろえる（Mac・iPad・iPhone 共通）
+   文字のボタン：高さ30px・文字13px・左右14px・角6px。Noto Sans JP は文字が下に寄って見えるので、下に2pxあけて文字を1px上げる
+   アイコンだけのボタン：30px四方・角6px */
+.btn,.seg button,.sb,.rbtn,.expand,.dash{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:30px;padding:0 14px 2px;border-radius:6px;font-size:13px;line-height:1.6}
+.sb{justify-content:flex-start;gap:10px;width:auto;max-width:100%;align-self:flex-start;text-align:left}
+.sb .n{margin-left:4px;font-size:13px}
+.rbtn{margin-right:6px}
+.expand{min-width:0;margin-top:22px;border-width:1px}
+.dash{margin-top:8px;border-width:1px;font-weight:400}
+.chip{height:auto;min-height:30px;padding:0 8px 2px 12px;border-radius:6px;font-size:13px}
+.ib{width:30px;height:30px;border-radius:6px}
+.tb{border-radius:6px}
+.tb button{height:30px;padding:0 8px 2px}
+.sform .btn{align-self:auto}
+/* 文字の欄も Kousei と同じ高さ38px・文字15px・角8px（iPhoneでは上の指定で16px） */
+.newcat input,.crow input{height:38px;padding:0 10px;border-radius:8px;font-size:15px}
+.newcat{align-items:center}
 </style>
 </head>
 <body>
@@ -481,7 +498,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.19';
+var VERSION='1.20';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
