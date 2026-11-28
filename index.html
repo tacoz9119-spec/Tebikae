@@ -486,6 +486,22 @@ body.nosel{-webkit-user-select:none;user-select:none}
 .wtools::-webkit-scrollbar{display:none}
 /* お知らせ：左右16pxの余白まで横に広げ、中央に置く（Mac・iPad では最大560px） */
 .toast{left:16px;right:16px;margin:0 auto;width:max-content;max-width:min(560px, calc(100% - 32px));transform:none}
+/* ===== 文字の大きさのルール（1.26） =====
+   メモの中身：Mac・iPad は一覧の行・アウトライン・本文とも14、iPhone は3つとも16。メモの題名は22
+   枠のあるボタン（文字のボタン・切り替え・道具の帯・＋カテゴリを追加・カテゴリの札・お知らせの「元に戻す」）は13
+   枠のない押すもの（タブ・カテゴリの行・メニュー・カテゴリを選ぶ一覧・戻る・キャンセル）は14のまま
+   文字のリンク（パスワードを忘れた場合）・開閉の印は12 */
+:root{--ts:22px}
+@media (pointer:fine){ :root{--fs:14px;--rowf:14px} }
+@media (pointer:coarse) and (min-width:701px) and (min-height:501px){ :root{--fs:14px;--rowf:14px} }
+@media (pointer:coarse) and (max-width:700px),(pointer:coarse) and (max-height:500px){ :root{--fs:16px;--rowf:16px} }
+.mb,.mbv{font-size:calc(var(--fs) + var(--dfs))}
+@media (pointer:coarse) and (max-width:700px),(pointer:coarse) and (max-height:500px){
+  textarea.mb,.lview.mbv{font-size:max(16px, calc(var(--fs) + var(--dfs)))!important}
+}
+.btn,.seg button,.sb,.rbtn,.expand,.dash,.chip,.chip span,.tb button,.toast button,.sb .n,.sheet .sb .n,.sheet.panel .btn,.sheet.panel .seg button,.sheet.panel .sb .n{font-size:13px}
+.linkish,.sheet.panel .linkish{font-size:12px}
+.tog{font-size:12px}
 </style>
 </head>
 <body>
@@ -588,7 +604,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.25';
+var VERSION='1.26';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
