@@ -484,6 +484,8 @@ body.nosel{-webkit-user-select:none;user-select:none}
 /* それでも足りない狭い窓（Mac）では、帯を横にずらして見る */
 .wtools{overflow-x:auto;scrollbar-width:none}
 .wtools::-webkit-scrollbar{display:none}
+/* お知らせ：左右16pxの余白まで横に広げ、中央に置く（Mac・iPad では最大560px） */
+.toast{left:16px;right:16px;margin:0 auto;width:max-content;max-width:min(560px, calc(100% - 32px));transform:none}
 </style>
 </head>
 <body>
@@ -586,7 +588,7 @@ body.nosel{-webkit-user-select:none;user-select:none}
 <script>
 (function(){
 'use strict';
-var VERSION='1.24';
+var VERSION='1.25';
 var NARROW=window.matchMedia('(max-width: 759px)');
 function $(id){ return document.getElementById(id); }
 var app=$('app'), rowsEl=$('rows'), outline=$('outline'), mt=$('mt'), mb=$('mb'), mcol=$('mcol'), mscroll=$('mscroll'), ftools=$('ftools'), ov=$('ov'), sheet=$('sheet');
